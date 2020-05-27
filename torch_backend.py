@@ -295,6 +295,7 @@ OUTPUT = 'output'
 OPTS = 'optimisers'
 ACT_LOG = 'activation_log'
 WEIGHT_LOG = 'weight_log'
+MASK = "mask"
 
 #step definitions
 def forward(training_mode):
@@ -326,6 +327,12 @@ def backward(dtype=None):
         loss.sum().backward()
     return step
 
+def apply_mask_grad(dtype=None):
+    def apply(state):
+        if state.get(MASK) is not None:
+            state[MODEL].grad *= state[MASK]
+    return apply
+
 def opt_steps(batch, state):
     if not batch: return
     return {OPTS: [opt_step(**opt) for opt in state[OPTS]]}
@@ -356,7 +363,7 @@ def update_ema(momentum, update_freq=1):
             ema_v += (1-rho)*v
     return step
 
-default_train_steps = (forward(training_mode=True), log_activations(('loss', 'acc')), backward(), opt_steps)
+default_train_steps = (forward(training_mode=True), log_activations(('loss', 'acc')), backward(), apply_mask_grad(), opt_steps)
 default_valid_steps = (forward(training_mode=False), log_activations(('loss', 'acc')))
 
 
