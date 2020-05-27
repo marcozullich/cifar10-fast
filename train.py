@@ -5,12 +5,6 @@ from core import *
 from torch_backend import *
 from resnet import net_half as model
 
-if __name__=="__main__":
-    ## env vars
-    prunedlayersim_root = "../prunedlayersim"
-    DATA_DIR = os.path.join(prunedlayersim_root,"data")
-    train(DATA_DIR)
-
 def train(data_dir, epochs_train=24,  batch_size=512, device="cuda:0" if torch.cuda.is_available() else "cpu", net=None, state_load=None, save_file=None, mask_grad=None):
     dataset = cifar10(root=data_dir)
     lr_schedule=PiecewiseLinear([0, 5, epochs_train], [0, 0.4, 0])
@@ -68,4 +62,8 @@ def train(data_dir, epochs_train=24,  batch_size=512, device="cuda:0" if torch.c
 
 
 
-
+if __name__=="__main__":
+    ## env vars
+    prunedlayersim_root = "../prunedlayersim"
+    DATA_DIR = os.path.join(prunedlayersim_root,"data")
+    train(DATA_DIR)
