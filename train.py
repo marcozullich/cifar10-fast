@@ -3,7 +3,7 @@ import os
 
 from core import *
 from torch_backend import *
-from resnet import net_half as model
+from resnet import net_half, net_full
 
 if __name__=="__main__":
     ## env vars
@@ -11,7 +11,7 @@ if __name__=="__main__":
     DATA_DIR = os.path.join(prunedlayersim_root,"data")
     train(DATA_DIR)
 
-def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cuda.is_available() else "cpu", net=None, state_load=None, save_file=None, mask_grad=None, verbose=1):
+def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cuda.is_available() else "cpu", net=None, state_load=None, save_file=None, mask_grad=None, verbose=1, half=True):
     dataset = cifar10(root=data_dir)
     lr_schedule=PiecewiseLinear([0, 5, epochs_train], [0, 0.4, 0])
     train_transforms = [Crop(32, 32), FlipLR(), Cutout(8, 8)]
@@ -35,11 +35,12 @@ def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cu
     train_set = list(zip(*preprocess(dataset['train'], [partial(pad, border=4)] + transforms).values()))
     valid_set = list(zip(*preprocess(dataset['valid'], transforms).values()))
 
-    train_batches = DataLoader(Transform(train_set, train_transforms), batch_size, shuffle=True, set_random_choices=True, drop_last=True)
-    valid_batches = DataLoader(valid_set, batch_size, shuffle=False, drop_last=False)
+    train_batches = DataLoader(Transform(train_set, train_transforms), batch_size, shuffle=True, set_random_choices=True, drop_last=True, half=half)
+    valid_batches = DataLoader(valid_set, batch_size, shuffle=False, drop_last=False, half=half)
     lr = lambda step: lr_schedule(step/len(train_batches))/batch_size
 
     if net is None:
+        model = net_half if half else net_full
         net = model(device)
         if verbose:
             print("Created new model")
@@ -85,4 +86,5 @@ if __name__=="__main__":
     ## env vars
     prunedlayersim_root = "../prunedlayersim"
     DATA_DIR = os.path.join(prunedlayersim_root,"data")
-    train(DATA_DIR)
+    half = False
+    train(DATA_DIR, half)

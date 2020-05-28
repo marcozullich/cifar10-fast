@@ -69,7 +69,7 @@ cifar10_classes= 'airplane, automobile, bird, cat, deer, dog, frog, horse, ship,
 #####################
 
 class DataLoader():
-    def __init__(self, dataset, batch_size, shuffle, set_random_choices=False, num_workers=0, drop_last=False):
+    def __init__(self, dataset, batch_size, shuffle, set_random_choices=False, num_workers=0, drop_last=False, half=True):
         self.dataset = dataset
         self.batch_size = batch_size
         self.set_random_choices = set_random_choices
@@ -78,9 +78,10 @@ class DataLoader():
         )
     
     def __iter__(self):
+        half_or_not = lambda x: torch.half(x) if half else x
         if self.set_random_choices:
             self.dataset.set_random_choices() 
-        return ({'input': x.to(device).half(), 'target': y.to(device).long()} for (x,y) in self.dataloader)
+        return ({'input': half_or_not(x.to(device)), 'target': y.to(device).long()} for (x,y) in self.dataloader)
     
     def __len__(self): 
         return len(self.dataloader)
