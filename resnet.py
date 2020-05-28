@@ -38,3 +38,6 @@ def net(channels=None, weight=0.125, pool=nn.MaxPool2d(2), extra_layers=(), res_
 
 def net_half(device = "cuda" if torch.cuda.is_available() else "cpu"):
     return Network(net()).to(device).half()
+
+def net_full(device = "cuda" if torch.cuda.is_available() else "cpu"):
+    return Network(net()).to(device)
