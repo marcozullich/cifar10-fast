@@ -75,6 +75,8 @@ def IMP(num_ite, fully_trained_state, pr_rate=0.2, device="cuda:0" if torch.cuda
         # retrain passing mask
         train_state = train(data_dir, net=net, mask_grad=mask, verbose=verbose-2, **kwargs)
 
+
+        # prepare for saving
         train_state["mask"] = mask
 
         torch.save(train_state, intermediate_dumps.format(ite))
@@ -82,7 +84,10 @@ def IMP(num_ite, fully_trained_state, pr_rate=0.2, device="cuda:0" if torch.cuda
             print(f"    Dumped state_dict, stats, and mask to {intermediate_dumps.format(ite)}")
 
 if __name__=="__main__":
+    # num_ite, fully_trained_state, pr_rate=0.2, device="cuda:0" if torch.cuda.is_available() else "cpu", intermediate_dumps="IMP_checkpoint_{}.torch", verbose=1, resume_ite=None, data_dir="../prunedlayersim/data",
 
+    num_ite = 20
+    fully_trained_state = 
 
 
 
