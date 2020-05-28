@@ -66,4 +66,5 @@ if __name__=="__main__":
     ## env vars
     prunedlayersim_root = "../prunedlayersim"
     DATA_DIR = os.path.join(prunedlayersim_root,"data")
-    train(DATA_DIR)
+    save_file = prunedlayersim_root + "/models/resnet/resnet_fast.torch"
+    train(DATA_DIR, save_file=save_file)
