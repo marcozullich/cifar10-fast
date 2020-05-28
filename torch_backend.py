@@ -333,7 +333,8 @@ def backward(dtype=None):
     return step
 
 def apply_mask_grad(dtype=None):
-    def apply(state):
+    def apply(batch, state):
+        if not batch: return
         if state.get(MASK) is not None:
             apply_mask(state[MODEL], state[MASK], gradient=True)
     return apply

@@ -81,4 +81,8 @@ def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cu
 
 
 
-
+if __name__=="__main__":
+    ## env vars
+    prunedlayersim_root = "../prunedlayersim"
+    DATA_DIR = os.path.join(prunedlayersim_root,"data")
+    train(DATA_DIR)
