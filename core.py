@@ -42,13 +42,13 @@ class Table():
         self.keys, self.report, self.formatter = keys, report, formatter
         self.log = []
         
-    def append(self, data):
+    def append(self, data, verbose=True):
         self.log.append(data)
         data = {' '.join(p): v for p,v in path_iter(data)}
         self.keys = self.keys or data.keys()
-        if len(self.log) is 1:
+        if len(self.log) is 1 and verbose:
             print(*(self.formatter(k, True) for k in self.keys))
-        if self.report(data):
+        if self.report(data) and verbose:
             print(*(self.formatter(data[k]) for k in self.keys))
             
     def df(self):

@@ -11,7 +11,7 @@ if __name__=="__main__":
     DATA_DIR = os.path.join(prunedlayersim_root,"data")
     train(DATA_DIR)
 
-def train(data_dir, epochs_train=24,  batch_size=512, device="cuda:0" if torch.cuda.is_available() else "cpu", net=None, state_load=None, save_file=None, mask_grad=None):
+def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cuda.is_available() else "cpu", net=None, state_load=None, save_file=None, mask_grad=None, verbose=1):
     dataset = cifar10(root=data_dir)
     lr_schedule=PiecewiseLinear([0, 5, epochs_train], [0, 0.4, 0])
     train_transforms = [Crop(32, 32), FlipLR(), Cutout(8, 8)]
@@ -41,29 +41,42 @@ def train(data_dir, epochs_train=24,  batch_size=512, device="cuda:0" if torch.c
 
     if net is None:
         net = model(device)
-        print("Created new model")
+        if verbose:
+            print("Created new model")
     else:
-        print("Using previously defined model")
+        if verbose:
+            print("Using previously defined model")
 
     if state_load is not None:
         net.load_state_dict(torch.load(state_load)["state_dict"])
-        print(f"Loading state dict from {state_load}")        
+        if verbose:
+            print(f"Loading state dict from {state_load}")        
 
 
     opts = [SGD(trainable_params(net).values(), {'lr': lr, 'weight_decay': Const(5e-4*batch_size), 'momentum': Const(0.9)})]
     logs, state = Table(), {MODEL: net, LOSS: x_ent_loss, OPTS: opts, MASK: mask_grad}
 
     for epoch in range(epochs_train):
-        logs.append(union({'epoch': epoch+1}, train_epoch(state, Timer(torch.cuda.synchronize), train_batches, valid_batches)))
+        logs.append(union({'epoch': epoch+1}, train_epoch(state, Timer(torch.cuda.synchronize), train_batches, valid_batches)), verbose=verbose>1)
+
+    final_stats = {"train_acc": logs.log[-1]["train"]["acc"]}
+    final_stats["test_acc"] = logs.log[-1]["valid"]["acc"]
+    final_stats["train_loss"] = logs.log[-1]["train"]["loss"]
+    final_stats["test_loss"] = logs.log[-1]["valid"]["loss"]
+    final_stats["state_dict"] = net.state_dict()
+    torch.save(final_stats, state_destination)
+
 
     if state_destination is not None:
-        final_stats = {"train_acc": logs.log[-1]["train"]["acc"]}
-        final_stats["test_acc"] = logs.log[-1]["valid"]["acc"]
-        final_stats["train_loss"] = logs.log[-1]["train"]["loss"]
-        final_stats["test_loss"] = logs.log[-1]["valid"]["loss"]
-        final_stats["state_dict"] = net.state_dict()
-        torch.save(final_stats, state_destination)
-        print(f"==> Dumped state_dict & stats to {os.path.abspath(state_destination)}")
+        
+        if verbose:
+            print(f"==> Dumped state_dict & stats to {os.path.abspath(state_destination)}")
+    else:
+        
+        if verbose:
+            print("==> state_dict not saved since no viable path was passed as save_file")
+        
+        return final_stats
 
 
 

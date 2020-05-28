@@ -5,6 +5,11 @@ from core import *
 from collections import namedtuple 
 from itertools import count
 
+import sys
+
+sys.path.append("../prunedlayersim")
+from layer_sim.utils.pytorch_utils import apply_mask
+
 torch.backends.cudnn.benchmark = True
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 cpu = torch.device("cpu")
@@ -330,7 +335,7 @@ def backward(dtype=None):
 def apply_mask_grad(dtype=None):
     def apply(state):
         if state.get(MASK) is not None:
-            state[MODEL].grad *= state[MASK]
+            apply_mask(state[MODEL], state[MASK], gradient=True)
     return apply
 
 def opt_steps(batch, state):
