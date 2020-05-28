@@ -5,11 +5,10 @@ from core import *
 from torch_backend import *
 from resnet import net_half, net_full
 
-if __name__=="__main__":
-    ## env vars
-    prunedlayersim_root = "../prunedlayersim"
-    DATA_DIR = os.path.join(prunedlayersim_root,"data")
-    train(DATA_DIR)
+import sys
+sys.path.append("../prunedlayersim")
+from layer_sim.lottery_ticket.LF_Mask import LF_mask_global as Mask
+
 
 def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cuda.is_available() else "cpu", net=None, state_load=None, save_file=None, mask_grad=None, verbose=1, half=True):
     dataset = cifar10(root=data_dir)
@@ -80,11 +79,12 @@ def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cu
         return final_stats
 
 
-
-
 if __name__=="__main__":
     ## env vars
     prunedlayersim_root = "../prunedlayersim"
     DATA_DIR = os.path.join(prunedlayersim_root,"data")
     half = False
-    train(DATA_DIR, half)
+    save_file = prunedlayersim_root + "/models/resnet/resnet_fast.torch"
+    net = model()
+    mask = Mask(net, 0.5, previous_mask=None, layertypes_to_prune="conv")
+    train(DATA_DIR, save_file=save_file, mask_grad=mask, half=half)
