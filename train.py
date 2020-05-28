@@ -85,6 +85,6 @@ if __name__=="__main__":
     DATA_DIR = os.path.join(prunedlayersim_root,"data")
     half = False
     save_file = prunedlayersim_root + "/models/resnet/resnet_fast.torch"
-    net = model()
+    net = net_full()
     mask = Mask(net, 0.5, previous_mask=None, layertypes_to_prune="conv")
-    train(DATA_DIR, save_file=save_file, mask_grad=mask, half=half)
+    train(DATA_DIR, net=net, save_file=save_file, mask_grad=mask, half=half)
