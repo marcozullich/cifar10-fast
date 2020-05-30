@@ -8,6 +8,7 @@ from resnet import net_half, net_full
 import sys
 sys.path.append("../prunedlayersim")
 from layer_sim.lottery_ticket.LF_Mask import LF_mask_global as Mask
+from layer_sim.utils.pytorch_utils import apply_mask
 
 
 def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cuda.is_available() else "cpu", net=None, state_load=None, save_file=None, mask_grad=None, verbose=1, half=True):
@@ -63,12 +64,11 @@ def train(data_dir, epochs_train=24, batch_size=512, device="cuda:0" if torch.cu
     final_stats["test_acc"] = logs.log[-1]["valid"]["acc"]
     final_stats["train_loss"] = logs.log[-1]["train"]["loss"]
     final_stats["test_loss"] = logs.log[-1]["valid"]["loss"]
-    final_stats["state_dict"] = net.state_dict()
-    torch.save(final_stats, state_destination)
+    final_stats["state_dict"] = net.state_dict()      
 
 
     if state_destination is not None:
-        
+        torch.save(final_stats, state_destination)
         if verbose:
             print(f"==> Dumped state_dict & stats to {os.path.abspath(state_destination)}")
     else:
@@ -84,7 +84,8 @@ if __name__=="__main__":
     prunedlayersim_root = "../prunedlayersim"
     DATA_DIR = os.path.join(prunedlayersim_root,"data")
     half = False
-    save_file = prunedlayersim_root + "/models/resnet/resnet_fast.torch"
-    net = net_full()
-    mask = Mask(net, 0.5, previous_mask=None, layertypes_to_prune="conv")
-    train(DATA_DIR, net=net, save_file=save_file, mask_grad=mask, half=half)
+    save_file = None #prunedlayersim_root + "/models/resnet/resnet_fast_full.torch"
+    net = net_full() if not half else net_half()
+    mask = None # Mask(net, 0.5, previous_mask=None, layertypes_to_prune=["conv"])
+    #apply_mask(net, mask)
+    train(DATA_DIR, net=net, save_file=save_file, mask_grad=mask, half=half, verbose=10)

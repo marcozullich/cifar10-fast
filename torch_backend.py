@@ -79,7 +79,7 @@ class DataLoader():
         self.half = half
     
     def __iter__(self):
-        half_or_not = lambda x: torch.half(x) if self.half else x
+        half_or_not = lambda x: torch.Tensor.half(x) if self.half else x
         if self.set_random_choices:
             self.dataset.set_random_choices() 
         return ({'input': half_or_not(x.to(device)), 'target': y.to(device).long()} for (x,y) in self.dataloader)
