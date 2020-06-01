@@ -1,6 +1,7 @@
 import torch
 import os
 from resnet import net_full
+from copy import deepcopy as copy
 
 import sys
 sys.path.append("../prunedlayersim")
@@ -31,8 +32,15 @@ pruned, _ = get_layers_batches(net, loader, "cuda", limit_dataset_numerosity=500
 
 print("Applying reshapes...")
 
-compl2 = [reshape_layer(c, ReshapingTechnique(1)) for c in compl]
-pruned2 = [reshape_layer(c, ReshapingTechnique(1)) for c in pruned]
+compl2 = copy(compl)
+pruned2 = copy(pruned)
+for c in compl2[:-1]:
+    c = reshape_layer(c, ReshapingTechnique(1))
+for c in pruned2[:1]:
+    c = reshape_layer(c, ReshapingTechnique(1))
+
+#compl2 = [reshape_layer(c, ReshapingTechnique(1)) for c in compl]
+#pruned2 = [reshape_layer(c, ReshapingTechnique(1)) for c in pruned]
 
 compl = [c.view(c.shape[0],-1) for c in compl]
 pruned = [c.view(c.shape[0],-1) for c in pruned]
