@@ -1,6 +1,6 @@
 data/
 .vscode/
-.torch
+*.torch
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
