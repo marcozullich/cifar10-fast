@@ -92,7 +92,7 @@ if __name__=="__main__":
     folder = "../prunedlayersim/models/resnet/"
     fully_trained_state = folder + "resnet_fast_full.torch"
     half = False
-    intermediate_dumps = folder + "IMP/2/IMP_checkpoint_{}.torch"
+    intermediate_dumps = folder + "IMP/3/IMP_checkpoint_{}.torch"
     
     IMP(num_ite, fully_trained_state, intermediate_dumps = intermediate_dumps, half = half, verbose=10)
 
